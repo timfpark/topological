@@ -3,22 +3,33 @@ const fixtures = require('../fixtures');
 const { Node } = require('../../core');
 
 describe('Node', function() {
-    it('can start and process', function(done) {
+    it('can start, process, and stop', done => {
         fixtures.incrementNode.start(err => {
             assert(!err);
 
-            fixtures.outputConnection.dequeue((err, message) => {
+            fixtures.incrementNode.start(err => {
                 assert(!err);
-                assert(message);
-                assert(message.number, 2);
 
-                done();
-            });
+                fixtures.outputConnection.dequeue((err, message) => {
+                    assert(!err);
+                    assert(message);
+                    assert(message.number, 2);
 
-            fixtures.inputConnection.enqueue([{
-                number: 1
-            }], err => {
-                assert(!err);
+                    fixtures.incrementNode.stop(err => {
+                        assert(!err);
+                        fixtures.incrementNode.stop(err => {
+                            assert(!err);
+
+                            done();
+                        });
+                    });
+                });
+
+                fixtures.inputConnection.enqueue([{
+                    number: 1
+                }], err => {
+                    assert(!err);
+                });
             });
         });
     });

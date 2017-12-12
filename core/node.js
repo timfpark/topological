@@ -27,7 +27,7 @@ class Node {
 
     startMessageProcessing(callback) {
         async.each(this.inputs, (input, inputCallback) => {
-            console.log(`${this.name}: message loop for input ${input.name} starting`);
+            console.log(`${this.name}: starting message loop for input ${input.name}`);
             async.whilst(
                 () => { return this.started; },
                 messageCallback => {
@@ -70,7 +70,12 @@ class Node {
     }
 
     start(callback) {
-        console.log(`${this.name}: starting`);
+        if (this.started) {
+            console.log(`${this.name}: node already started.`);
+            return callback();
+        }
+
+        console.log(`${this.name}: starting node.`);
         this.startChildren(err => {
             if (err) return callback(err);
 
@@ -80,19 +85,26 @@ class Node {
         });
     }
 
-    stop(done) {
+    stop(callback) {
+        if (!this.started) {
+            console.log(`${this.name}: node already stopped.`);
+            return callback();
+        }
+
+        console.log(`${this.name}: stopping node.`);
+
         this.started = false;
 
         async.series([
-            inputCallback => {
+            inputsCallback => {
                 async.each(this.inputs, (input, inputCallback) => {
                     input.stop(inputCallback);
-                }, done);
+                }, inputsCallback);
             },
-            outputCallback => {
+            outputsCallback => {
                 async.each(this.outputs, (output, outputCallback) => {
                     output.stop(outputCallback);
-                }, done);
+                }, outputsCallback);
             },
             processorCallback => {
                 this.processor.stop(processorCallback);
