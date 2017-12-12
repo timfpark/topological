@@ -1,8 +1,10 @@
 const async = require('async');
 
 class Topology {
-    constructor(nodes) {
-        this.nodes = nodes;
+    constructor(options) {
+        for (let key in options) {
+            this[key] = options[key];
+        }
     }
 
     start(callback) {

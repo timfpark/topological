@@ -1,5 +1,5 @@
 module.exports = {
-    Connector: require('./connector'),
+    Connection: require('./connection'),
     Node: require('./node'),
     Processor: require('./processor'),
     Topology: require('./topology')

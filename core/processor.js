@@ -2,25 +2,25 @@ const async = require('async');
 
 class Processor {
     constructor(options) {
-        this.name = options.name;
+        for (let key in options) {
+            this[key] = options[key];
+        }
     }
 
-    process(message, done) {
-        return done();
+    process(message, callback) {
+        return callback();
     }
 
-    emit(message, done) {
-        async.each(this.outputs, (output, outputCallback) => {
-            output.queue(message, outputCallback);
-        }, done);
+    emit(messages, callback) {
+        this.parentNode.enqueueOutputMessages(messages, callback);
     }
 
-    start(done) {
-        return done();
+    start(callback) {
+        return callback();
     }
 
-    stop(done) {
-        return done();
+    stop(callback) {
+        return callback();
     }
 }
 

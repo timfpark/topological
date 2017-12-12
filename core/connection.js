@@ -1,9 +1,15 @@
-class Connector {
-    constructor(config) {
-        this.config = config;
+class Connection {
+    constructor(options) {
+        for (let key in options) {
+            this[key] = options[key];
+        }
     }
 
     complete(message, callback) {
+        return callback();
+    }
+
+    failed(message, callback) {
         return callback();
     }
 
@@ -24,4 +30,4 @@ class Connector {
     }
 }
 
-module.exports = Connector;
+module.exports = Connection;

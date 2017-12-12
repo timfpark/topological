@@ -1,13 +1,10 @@
 const async = require('async');
 
-const DEQUEUE_TIMEOUT = 500;
-
 class Node {
-    constructor(node) {
-        this.inputs = node.inputs;
-        this.processor = node.processor;
-        this.outputs = node.outputs;
-        this.name = node.name;
+    constructor(options) {
+        for (let key in options) {
+            this[key] = options[key];
+        }
 
         this.started = false;
     }
@@ -16,10 +13,6 @@ class Node {
         input.dequeue((err, message) => {
             if (err) {
                 console.log(`${this.name}: error: ${err}`);
-            }
-
-            if (!message) {
-                console.log(`${this.name}: no messages`);
             }
 
             return callback(err, message);
@@ -32,24 +25,24 @@ class Node {
         }, callback);
     }
 
-    messageLoop() {
+    startMessageProcessing(callback) {
         async.each(this.inputs, (input, inputCallback) => {
-            console.log(`${this.name}: starting message loop`);
+            console.log(`${this.name}: message loop for input ${input.name} starting`);
             async.whilst(
-                () => {
-                    return this.started;
-                },
+                () => { return this.started; },
                 messageCallback => {
                     this.dequeueInputMessage(input, (err, message) => {
-                        if (err || !message) return setTimeout(() => { messageCallback(); }, DEQUEUE_TIMEOUT);
+                        if (err) return messageCallback();
 
                         console.log(`${this.name}: processing ${JSON.stringify(message)}`);
 
                         this.processor.process(message, (err, outputMessages) => {
-                            if (err || !message) return setTimeout(() => { messageCallback(); }, DEQUEUE_TIMEOUT);
+                            if (err) return input.failed(message, messageCallback);
 
                             this.enqueueOutputMessages(outputMessages, err => {
-                                setImmediate(messageCallback);
+                                if (err) return input.failed(message, messageCallback);
+
+                                input.completed(message, messageCallback);
                             });
                         });
                     });
@@ -57,7 +50,9 @@ class Node {
                     console.log(`${this.name}: message loop for input ${input.name} stopping.`);
                 }
             );
-        });
+
+            return inputCallback();
+        }, callback);
     }
 
     startChildren(callback) {
@@ -83,10 +78,9 @@ class Node {
         this.startChildren(err => {
             if (err) return callback(err);
 
+            this.processor.parentNode = this;
             this.started = true;
-            this.messageLoop();
-
-            return callback();
+            this.startMessageProcessing(callback);
         });
     }
 
