@@ -36,14 +36,10 @@ class Node {
 
                         console.log(`${this.name}: processing ${JSON.stringify(message)}`);
 
-                        this.processor.process(message, (err, outputMessages) => {
+                        this.processor.process(message, err => {
                             if (err) return input.failed(message, messageCallback);
 
-                            this.enqueueOutputMessages(outputMessages, err => {
-                                if (err) return input.failed(message, messageCallback);
-
-                                input.completed(message, messageCallback);
-                            });
+                            input.completed(message, messageCallback);
                         });
                     });
                 }, (err, n) => {
