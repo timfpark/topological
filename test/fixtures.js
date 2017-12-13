@@ -4,19 +4,19 @@ const DirectConnection = require('topological-direct');
 const { Node, Topology } = require('../lib');
 
 let inputConnection = new DirectConnection({
-    name: "inputConnection"
+    id: "inputConnection"
 });
 
 let incrementProcessor = new IncrementProcessor({
-    name: "incrementProcessor"
+    id: "incrementProcessor"
 });
 
 let outputConnection  = new DirectConnection({
-    name: "outputConnection"
+    id: "outputConnection"
 });
 
 let incrementNode = new Node({
-    name: 'incrementNumber',
+    id: 'incrementNumber',
     inputs: [inputConnection],
     processor: incrementProcessor,
     outputs: [outputConnection]
