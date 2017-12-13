@@ -1,7 +1,7 @@
 const IncrementProcessor = require('./incrementProcessor');
 
-const { DirectConnection } = require('../connectors');
-const { Node, Topology } = require('../core');
+const DirectConnection = require('topological-direct');
+const { Node, Topology } = require('../lib');
 
 let inputConnection = new DirectConnection({
     name: "inputConnection"

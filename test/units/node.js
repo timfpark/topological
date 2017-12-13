@@ -1,6 +1,5 @@
 const assert = require('assert');
 const fixtures = require('../fixtures');
-const { Node } = require('../../core');
 
 describe('Node', function() {
     it('can start, process, and stop', done => {

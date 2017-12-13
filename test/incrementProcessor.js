@@ -1,4 +1,4 @@
-const { Processor } = require('../core');
+const { Processor } = require('../lib');
 
 class IncrementProcessor extends Processor {
     process(message, callback) {
