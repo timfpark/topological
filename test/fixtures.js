@@ -22,9 +22,10 @@ let incrementNode = new Node({
     outputs: [outputConnection]
 });
 
-let topology = new Topology([
-    incrementNode,
-]);
+let topology = new Topology({
+    id: 'topology',
+    nodes: [ incrementNode ]
+});
 
 module.exports = {
     incrementNode,
