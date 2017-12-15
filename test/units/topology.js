@@ -20,7 +20,7 @@ describe('Topology', function() {
                         fixtures.topology.stop(err => {
                             assert(!err);
 
-                            done();
+                            setImmediate(done);
                         });
                     });
                 });

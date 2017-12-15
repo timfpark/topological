@@ -19,7 +19,7 @@ describe('Node', function() {
                         fixtures.incrementNode.stop(err => {
                             assert(!err);
 
-                            done();
+                            setImmediate(done);
                         });
                     });
                 });
