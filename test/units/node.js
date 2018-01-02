@@ -12,17 +12,31 @@ describe('Node', function() {
                 fixtures.outputConnection.dequeue((err, message) => {
                     assert(!err);
                     assert(message);
-                    assert(message.number, 2);
+                    assert.equal(message.body.number, 2);
 
-                    fixtures.incrementNode.stop(err => {
+                    fixtures.outputConnection.dequeue((err, message) => {
                         assert(!err);
+                        assert(message);
+                        console.dir(message);
+                        assert(message.worked);
+
                         fixtures.incrementNode.stop(err => {
                             assert(!err);
+                            fixtures.incrementNode.stop(err => {
+                                assert(!err);
 
-                            setImmediate(done);
+                                setImmediate(done);
+                            });
                         });
                     });
+
+                    fixtures.incrementNode.enqueueOutputMessagesTo(['outputConnection'], [{
+                        worked: true
+                    }], err => {
+                        assert(!err);
+                    });
                 });
+
 
                 fixtures.inputConnection.enqueue([{
                     number: 1

@@ -12,7 +12,7 @@ describe('Topology', function() {
                 fixtures.outputConnection.dequeue((err, message) => {
                     assert(!err);
                     assert(message);
-                    assert(message.number, 2);
+                    assert.equal(message.body.number, 2);
 
                     fixtures.topology.stop(err => {
                         assert(!err);
