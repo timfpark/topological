@@ -1,16 +1,16 @@
 {
   "name": "topological",
-  "version": "1.0.13",
+  "version": "1.0.15",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "./cpd && mocha --exit"
   },
   "author": "Tim Park",
   "license": "MIT",
   "devDependencies": {
     "mocha": "^4.0.1",
-    "topological-direct": "^1.0.2"
+    "topological-direct": "^1.0.6"
   },
   "dependencies": {
     "async": "^2.6.0"

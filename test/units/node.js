@@ -3,23 +3,20 @@ const fixtures = require('../fixtures');
 
 describe('Node', function() {
     it('can start, process, and stop', done => {
+        let messageCount = 0;
         fixtures.incrementNode.start(err => {
             assert(!err);
 
             fixtures.incrementNode.start(err => {
                 assert(!err);
 
-                fixtures.outputConnection.dequeue((err, message) => {
+                fixtures.outputConnection.stream((err, message) => {
                     assert(!err);
                     assert(message);
                     assert.equal(message.body.number, 2);
 
-                    fixtures.outputConnection.dequeue((err, message) => {
-                        assert(!err);
-                        assert(message);
-                        console.dir(message);
-                        assert(message.worked);
-
+                    messageCount += 1;
+                    if (messageCount === 4) {
                         fixtures.incrementNode.stop(err => {
                             assert(!err);
                             fixtures.incrementNode.stop(err => {
@@ -28,18 +25,21 @@ describe('Node', function() {
                                 setImmediate(done);
                             });
                         });
-                    });
+                    }
+                });
 
-                    fixtures.incrementNode.enqueueOutputMessagesTo(['outputConnection'], [{
-                        worked: true
+                for (let idx=0; idx < 3; idx++) {
+                    fixtures.inputConnection.enqueue([{
+                        number: 1
                     }], err => {
                         assert(!err);
                     });
-                });
+                }
 
-
-                fixtures.inputConnection.enqueue([{
-                    number: 1
+                fixtures.incrementNode.enqueueOutputMessagesTo(['outputConnection'], [{
+                    body: {
+                        number: 2
+                    }
                 }], err => {
                     assert(!err);
                 });
