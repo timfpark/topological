@@ -4,11 +4,11 @@ class IncrementProcessor extends Processor {
     process(message, callback) {
         if (Math.random() < 0.1) return callback("fake error");
 
-        message.number += 1;
+        message.body.number += 1;
 
         // fake processing time
         setTimeout(() => {
-            this.output([message], callback);
+            this.output([message.body], callback);
         }, 1000);
     }
 }

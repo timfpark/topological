@@ -13,6 +13,7 @@ describe('Node', function() {
                 fixtures.outputConnection.stream((err, message) => {
                     assert(!err);
                     assert(message);
+
                     assert.equal(message.body.number, 2);
 
                     messageCount += 1;
@@ -30,13 +31,15 @@ describe('Node', function() {
 
                 for (let idx=0; idx < 3; idx++) {
                     fixtures.inputConnection.enqueue([{
-                        number: 1
+                        body: {
+                            number: 1
+                        }
                     }], err => {
                         assert(!err);
                     });
                 }
 
-                fixtures.incrementNode.enqueueOutputMessagesTo(['outputConnection'], [{
+                fixtures.incrementNode.outputTo(['outputConnection'], [{
                     body: {
                         number: 2
                     }

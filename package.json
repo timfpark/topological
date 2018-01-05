@@ -1,10 +1,10 @@
 {
   "name": "topological",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "./cpd && mocha --exit"
+    "test": "mocha --exit"
   },
   "author": "Tim Park",
   "license": "MIT",

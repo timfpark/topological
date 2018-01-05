@@ -26,7 +26,9 @@ describe('Topology', function() {
                 });
 
                 fixtures.inputConnection.enqueue([{
-                    number: 1
+                    body: {
+                        number: 1
+                    }
                 }], err => {
                     assert(!err);
                 });

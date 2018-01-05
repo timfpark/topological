@@ -17,7 +17,7 @@ let outputConnection  = new DirectConnection({
 
 let incrementNode = new Node({
     id: 'incrementNumber',
-    targetParallelism: 2,
+    parallelism: 2,
     inputs: [inputConnection],
     processor: incrementProcessor,
     outputs: [outputConnection]
