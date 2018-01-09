@@ -1,6 +1,6 @@
 {
   "name": "topological",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -13,6 +13,7 @@
     "topological-direct": "^1.0.8"
   },
   "dependencies": {
-    "async": "^2.6.0"
+    "async": "^2.6.0",
+    "prom-client": "^10.2.2"
   }
 }
