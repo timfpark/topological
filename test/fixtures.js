@@ -1,7 +1,7 @@
 const IncrementProcessor = require('./incrementProcessor');
 
 const DirectConnection = require('topological-direct');
-const { Node, Topology } = require('../lib');
+const { Log, Node, Topology } = require('../lib');
 
 let inputConnection = new DirectConnection({
     id: "inputConnection"
@@ -18,6 +18,9 @@ let outputConnection  = new DirectConnection({
 let incrementNode = new Node({
     id: 'incrementNumber',
     parallelism: 2,
+    log: new Log({
+        severity: 'debug'
+    }),
     inputs: [inputConnection],
     processor: incrementProcessor,
     outputs: [outputConnection]
@@ -25,6 +28,10 @@ let incrementNode = new Node({
 
 let topology = new Topology({
     id: 'topology',
+    log: new Log({
+        id: 'topology',
+        severity: 'debug'
+    }),
     nodes: [ incrementNode ]
 });
 
