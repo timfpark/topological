@@ -8,7 +8,7 @@ Likewise, Topological strives for developer simplicity as well. For the most par
 
 Finally, Topological aims to make deploying and operating data pipelines easy as well. Topological's tooling automatically generates the Helm deployment templates to deploy and scale your topology into a Kubernetes cluster from a logical description of the topology. Topological also provides Prometheus counters and metrics endpoints out of the box, making it easy to monitor the operation of the pipeline in production.
 
-## A Simple Manual Built Example
+## A Simple First Pipeline
 
 Let's look at a simple example to see how Topological works. Let's say that we have a very simple data pipeline that processees a stream of numbers between 0 and 100 and keeps a running tally of the split between how many are greater and less than 50.
 
@@ -112,27 +112,122 @@ $ npm install
 $ npm start
 
 Thu Jan 11 2018 16:11:56 GMT-0800 (PST) -----------> total: 1000
-0: 113
-1: 101
-2: 103
-3: 107
-4: 114
-5: 93
-6: 82
-7: 99
-8: 93
-9: 95
+0-9: 113
+10-19: 101
+20-29: 103
+30-39: 107
+40-49: 114
+50-59: 93
+60-69: 82
+70-79: 99
+80-89: 93
+90-99: 95
 
 Thu Jan 11 2018 16:11:57 GMT-0800 (PST) -----------> total: 2000
-0: 212
-1: 214
-2: 198
-3: 205
-4: 216
-5: 186
-6: 186
-7: 201
-8: 191
-9: 191
+0-9: 212
+10-19: 214
+20-29: 198
+30-39: 205
+40-49: 216
+50-59: 186
+60-69: 186
+70-79: 201
+80-89: 191
+90-99: 191
 ```
 
+## Pipeline and Deployment Generation
+
+Most developers using Topological won't actually write the pipeline.js code we saw in the simple example, but instead, they will write a pipeline definition that Topological will use to automatically build both the pipeline implementation and the templates for deploying it into Kubernetes.
+
+For this example, let's pretend we run a bus system and want to build a data pipeline to ingest our fleet's location in real time, make arrival predictions for each stop in its schedule, and notify smartphone users with the latest estimate. One potential data pipeline that implements this looks architecturally like this:
+
+![Bus Location Pipeline](./docs/location-pipeline.png)
+
+In topological, we define this pipeline using a topology definition that looks like this:
+
+{
+    "name": "location-pipeline",
+    "connections":[{
+        "id": "locations",
+        "type": "kafka",
+        "config": {
+            "id": "locations",
+            "keyField": "busId",
+            "topic": "locations",
+        }
+    }, {
+        "id": "estimatedArrivals",
+        "type": "kafka",
+        "config": {
+            "id": "locations",
+            "keyField": "busId",
+            "topic": "estimatedArrivals",
+        }
+    }],
+    "nodes": [{
+        "id": "writeLocation",
+        "inputs": ["locations"],
+        "processor": {
+            "platform": "node.js",
+            "file": "./processors/writeLocation.js"
+        },
+        "outputs": []
+    }, {
+        "id": "predictArrivals",
+        "inputs": ["locations"],
+        "processor": {
+            "platform": "node.js",
+            "file": "./processors/predictArrivals.js"
+        },
+        "outputs": ["estimatedArrivals"]
+    }, {
+        "id": "notifyArrivals",
+        "inputs": ["estimatedArrivals"],
+        "processor": {
+            "platform": "node.js",
+            "file": "./processors/notifyArrivals.js"
+        },
+        "outputs": []
+    }]
+}
+
+This definition is essentially a JSON respresentation of the underlying graph of processors and connections for the data pipeline that is described in the diagram above.  We combine that with a seperate deployment definition that looks like this:
+
+{
+    "target": "kubernetes",
+    "connections": [{
+        "id": "locations",
+        "config": {
+            "endpoint": "kafka-zookeeper.kafka.svc.cluster.local:2181"
+        },
+        "id": "estimatedArrivals",
+        "config": {
+            "endpoint": "kafka-zookeeper.kafka.svc.cluster.local:2181"
+        }
+    }],
+    "nodes": [{
+        "id": "writeLocation",
+        "scale: 4
+    }, {
+        "id": "predictArrivals",
+        "scale": 8
+    }, {
+        "id": "notifyArrivals",
+        "scale": 8
+    }]
+}
+
+Seperating deployment from topology details allows us to both extract the environment (dev vs. staging vs. production) and the deployment target (Kubernetes vs. Serverless) from the topology definition. Topological can then take these definitions and produces Helm Kubernentes deployment templates with just one command:
+
+```
+$ npm install -g topological-cli
+$ topo build location-topology.json location-prod.json
+```
+
+and which can be deployed with a single additional command:
+
+```
+$ cd build/prod
+$ ./deploy-pipeline
+```
