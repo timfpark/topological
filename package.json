@@ -1,19 +1,19 @@
 {
-  "name": "topological",
-  "version": "1.0.31",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "mocha --exit"
-  },
-  "author": "Tim Park",
-  "license": "MIT",
-  "devDependencies": {
-    "mocha": "^4.0.1",
-    "topological-direct": "^1.0.8"
-  },
-  "dependencies": {
-    "async": "^2.6.0",
-    "prom-client": "^10.2.2"
-  }
+    "name": "topological",
+    "version": "1.0.32",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "mocha --exit"
+    },
+    "author": "Tim Park",
+    "license": "MIT",
+    "devDependencies": {
+        "mocha": "^4.1.0",
+        "topological-direct": "^1.0.8"
+    },
+    "dependencies": {
+        "async": "^2.6.1",
+        "prom-client": "^11.1.1"
+    }
 }
