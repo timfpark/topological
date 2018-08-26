@@ -4,7 +4,7 @@ Topological is a framework for building stream processing topologies, inspired b
 
 In contrast, Topological is built from the ground up to be cloud native, leveraging Kubernetes to deploy, scale, and isolate processing. Its simplicity and low overhead makes it as equally applicable to small task queue processing as large scale data pipelines with dozens of stages.
 
-Topological also strives for developer simplicity as well. For the most part, Developers only concern themselves with writing message processing logic. The framework handles the rest including connections to common pieces of infrastructure like message brokers and queues that are typically used to interconnnect stages of a data pipeline.
+Topological also strives for developer simplicity as wel: Developers largely only have to concern themselves with writing message processing logic. The framework handles the rest including connections to common pieces of infrastructure like message brokers and queues that are typically used to interconnnect stages of a data pipeline.
 
 Finally, Topological aims to make deploying and operating data pipelines easy as well. Topological's tooling automatically generates the Helm deployment templates to deploy and scale your topology into a Kubernetes cluster from a logical description of the topology. Topological also provides Prometheus counters and metrics endpoints out of the box, making it easy to monitor the operation of the pipeline in production.
 
@@ -28,7 +28,7 @@ class RandomNumberConnection extends Connection {
 }
 ```
 
-The Connection class in Topological is very simple.  It essentially defines an interface for how messages are transited into and out of a node.  In this example, our connection implementation emits a random number every millisecond to the downstream processor.
+The Connection class in Topological is very simple. It essentially defines an interface for how messages are transited into and out of a node. In this example, our connection implementation emits a random number every millisecond to the downstream processor.
 
 Our processor implementation for counting numbers is equally simple:
 
@@ -102,16 +102,15 @@ let topology = new Topology({
 });
 
 topology.start();
-
 ```
 
-Essentially, this instantiates all of the processors and connections, then defines the topology for how they all connect together and flow, and starts it.  Under the covers, topological starts all the connections, streaming messages from them into processors, and from processors to output to connections.  We can see this by running the solution:
+Essentially, this instantiates all of the processors and connections, then defines the topology for how they all connect together and flow, and starts it. Under the covers, topological starts all the connections, streaming messages from them into processors, and from processors to output to connections. We can see this by running the solution:
 
 ```
 $ npm install
 $ npm start
 
-Thu Jan 11 2018 16:11:56 GMT-0800 (PST) -----------> total: 1000
+Thu Jan 11 2018 16:11:56 GMT-0800 (PST) total: 1000
 0-9: 113
 10-19: 101
 20-29: 103
@@ -123,7 +122,7 @@ Thu Jan 11 2018 16:11:56 GMT-0800 (PST) -----------> total: 1000
 80-89: 93
 90-99: 95
 
-Thu Jan 11 2018 16:11:57 GMT-0800 (PST) -----------> total: 2000
+Thu Jan 11 2018 16:11:57 GMT-0800 (PST) total: 2000
 0-9: 212
 10-19: 214
 20-29: 198
@@ -151,11 +150,6 @@ In topological, we define this pipeline using a topology definition that looks l
 ```
 {
     "name": "location-pipeline",
-    "connections":[{
-        "id": "locations",
-    }, {
-        "id": "estimatedArrivals",
-    }],
     "nodes": [{
         "id": "writeLocation",
         "inputs": ["locations"],
@@ -184,7 +178,7 @@ In topological, we define this pipeline using a topology definition that looks l
 }
 ```
 
-This definition is essentially a JSON respresentation of the underlying graph of processors and abstract connections between them for the data pipeline that is described in the diagram above.  We combine that with a seperate deployment definition that looks like this:
+This definition is essentially a JSON respresentation of the underlying graph of processors and abstract connections between them for the data pipeline that is described in the diagram above. We combine that with a seperate deployment definition that looks like this:
 
 ```
 {
@@ -196,7 +190,7 @@ This definition is essentially a JSON respresentation of the underlying graph of
             "id": "locations",
             "keyField": "busId",
             "topic": "locations",
-            "endpoint": "kafka-zookeeper.kafka.svc.cluster.local:2181"
+            "endpoint": "configMap:kafka-endpoint"
         }
     }, {
         "id": "estimatedArrivals",
@@ -205,32 +199,56 @@ This definition is essentially a JSON respresentation of the underlying graph of
             "id": "locations",
             "keyField": "busId",
             "topic": "estimatedArrivals",
-            "endpoint": "kafka-zookeeper.kafka.svc.cluster.local:2181"
+            "endpoint": "configMap:kafka-endpoint"
         }
     }],
-    "nodes": [{
-        "id": "writeLocation",
-        "scale: 4
-    }, {
-        "id": "predictArrivals",
-        "scale": 8
-    }, {
-        "id": "notifyArrivals",
-        "scale": 8
-    }]
+    "processors": {
+		"writeLocation": {
+			"config": {
+				"user": {
+					"accessToken": "secret:access-token"
+				}
+			}
+		},
+		"notifyArrivals": {
+			"config": {
+				"user": {
+					"accessToken": "secret:rhom-user-token"
+				}
+			}
+		}
+    },
+    "deployments": {
+		"writeLocations": {
+			"nodes": [
+				"writeLocation"
+			],
+			"replicas": {
+				"min": 2,
+				"max": 1
+			}
+		},
+        "predictAndNotify": {
+            "nodes": [
+				"predictArrivals",
+                "notifyArrivals"
+			],
+			"replicas": {
+				"min": 2,
+				"max": 1
+			}
+        }
+	}
 }
 ```
 
-Seperating deployment from topology details allows us to both extract the environment (dev vs. staging vs. production) and the deployment target (Kubernetes vs. let's say a serverless evnironment) from the topology definition. Topological can then take these definitions and produces Helm Kubernentes deployment templates with just one command:
+Seperating deployment from topology details allows us to both extract the environment (dev vs. staging vs. production) and the deployment target (Kubernetes vs. let's say a serverless evnironment) from the topology definition. In this case, we have a production deployment with two pipeline stage deployments. The first houses only the writeLocation processor while the second houses both the predictArrivals and notifyArrivals processors.
+
+Topological can then take these definitions and produces Helm Kubernentes deployment templates with just one command:
 
 ```
 $ npm install -g topological-cli
-$ topo build location-topology.json location-prod.json
+$ topo build topology.json prod.json
 ```
 
-and which can be deployed with a single additional command:
-
-```
-$ cd build/prod
-$ ./deploy-pipeline
-```
+This can be run directly in the CI/CD pipeline to generate the physical deployment artifacts that are then deployed on success. For a Kubernetes deployment, this takes the form of helm deployment scripts, which automatically pipes through the secrets and config maps stored seperately and securely through environmental variables to the pipeline stage.
