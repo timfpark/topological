@@ -203,42 +203,42 @@ This definition is essentially a JSON respresentation of the underlying graph of
         }
     }],
     "processors": {
-		"writeLocation": {
-			"config": {
-				"user": {
-					"accessToken": "secret:access-token"
-				}
-			}
-		},
-		"notifyArrivals": {
-			"config": {
-				"user": {
-					"accessToken": "secret:rhom-user-token"
-				}
-			}
-		}
+        "writeLocation": {
+            "config": {
+                "user": {
+                    "accessToken": "secret:access-token"
+                }
+            }
+        },
+        "notifyArrivals": {
+            "config": {
+                "user": {
+                    "accessToken": "secret:rhom-user-token"
+                }
+            }
+        }
     },
     "deployments": {
-		"writeLocations": {
-			"nodes": [
-				"writeLocation"
-			],
-			"replicas": {
-				"min": 2,
-				"max": 1
-			}
-		},
+        "writeLocations": {
+            "nodes": [
+                "writeLocation"
+            ],
+            "replicas": {
+                "min": 2,
+                "max": 1
+            }
+        },
         "predictAndNotify": {
             "nodes": [
-				"predictArrivals",
+                "predictArrivals",
                 "notifyArrivals"
-			],
-			"replicas": {
-				"min": 2,
-				"max": 1
-			}
+            ],
+            "replicas": {
+                "min": 2,
+                "max": 1
+            }
         }
-	}
+    }
 }
 ```
 
