@@ -13,6 +13,7 @@ describe('Node', function() {
                 fixtures.outputConnection.stream((err, message) => {
                     assert(!err);
                     assert(message);
+                    assert(fixtures.outputConnection.parentNode.id);
 
                     assert.equal(message.body.number, 2);
 
@@ -29,23 +30,34 @@ describe('Node', function() {
                     }
                 });
 
-                for (let idx=0; idx < 3; idx++) {
-                    fixtures.inputConnection.enqueue([{
-                        body: {
-                            number: 1
+                for (let idx = 0; idx < 3; idx++) {
+                    fixtures.inputConnection.enqueue(
+                        [
+                            {
+                                body: {
+                                    number: 1
+                                }
+                            }
+                        ],
+                        err => {
+                            assert(!err);
                         }
-                    }], err => {
-                        assert(!err);
-                    });
+                    );
                 }
 
-                fixtures.incrementNode.outputTo(['outputConnection'], [{
-                    body: {
-                        number: 2
+                fixtures.incrementNode.outputTo(
+                    ['outputConnection'],
+                    [
+                        {
+                            body: {
+                                number: 2
+                            }
+                        }
+                    ],
+                    err => {
+                        assert(!err);
                     }
-                }], err => {
-                    assert(!err);
-                });
+                );
             });
         });
     });

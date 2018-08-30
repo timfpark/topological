@@ -1,6 +1,6 @@
 {
     "name": "topological",
-    "version": "1.0.36",
+    "version": "1.0.37",
     "description": "",
     "main": "index.js",
     "scripts": {
@@ -10,7 +10,7 @@
     "license": "MIT",
     "devDependencies": {
         "mocha": "^4.1.0",
-        "topological-direct": "^1.0.8"
+        "topological-direct": "^1.0.9"
     },
     "dependencies": {
         "async": "^2.6.1",
